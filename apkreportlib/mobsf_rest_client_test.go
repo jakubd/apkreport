@@ -6,12 +6,23 @@ import (
 )
 
 func TestRecentScansCall(t *testing.T) {
-	apiInfo := MobSFApiInfo{
-		hostname: "http://0.0.0.0",
-		port: 8000,
-		apiKey: "",
+	apiInfo, err := GetApiInfoFromConfig()
+
+	if err != nil {
+		panic("can't read config")
 	}
 
-	err := RecentScansCall(&apiInfo, 1)
+	err = RecentScansCall(apiInfo, 1)
+	assert.NoError(t, err)
+}
+
+func TestGetReport(t *testing.T) {
+	apiInfo, err := GetApiInfoFromConfig()
+
+	if err != nil {
+		panic("can't read config")
+	}
+
+	err = GetReport(apiInfo)
 	assert.NoError(t, err)
 }
