@@ -1,24 +1,25 @@
 package apkreportlib
 
-import "github.com/spf13/viper"
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
-func CreateDefaultConfig() {
-
+func TestGetDefaultConfigFn(t *testing.T) {
+	dir, err := GetDefaultConfigFn()
+	assert.NoError(t, err)
+	assert.Equal(t, "/home/jt/.apkreport.yml", dir)
 }
 
-func GetApiInfoFromConfig() string {
-	viper.SetConfigName("apkreport")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("$HOME/.config")
-	viper.AddConfigPath(".")
+func TestCreateDefaultConfig(t *testing.T) {
+	err := CreateDefaultConfig()
+	assert.NoError(t, err)
+}
 
-	if err := viper.ReadInConfig(); err != nil {
-		return ""
-	}
-
-	//if len(viper.GetString("maxmind_dir")) > 1 {
-	//	return viper.GetString("maxmind_dir")
-	//}
-
-	return ""
+func TestGetApiInfoFromConfig(t *testing.T) {
+	apiInfo, err := GetApiInfoFromConfig()
+	assert.NoError(t, err)
+	assert.Greater(t, len(apiInfo.apiKey), 2)
+	assert.Greater(t, len(apiInfo.hostname), 2)
+	assert.Equal(t, apiInfo.port, 8000)
 }
