@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,7 +16,7 @@ func GetAPIEndpointUrl(info *MobSFApiInfo, endpoint string) string {
 	return info.hostname + ":" + strconv.Itoa(info.port) + "/api/v1/" + endpoint
 }
 
-func DoGet(url string, info *MobSFApiInfo ) (string, error) {
+func DoGet(url string, info *MobSFApiInfo) (string, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", info.apiKey)
@@ -33,11 +34,11 @@ func DoGet(url string, info *MobSFApiInfo ) (string, error) {
 }
 
 // RecentScansCall - http://0.0.0.0:8000/api_docs#recent-scans-api
-func RecentScansCall(info *MobSFApiInfo, pageNum int) (*MobSFRecentScansResults ,error) {
-	endpointUrl := GetAPIEndpointUrl(info, "scans")
+func RecentScansCall(apiInfo *MobSFApiInfo, pageNum int) (*MobSFRecentScansResults, error) {
+	endpointUrl := GetAPIEndpointUrl(apiInfo, "scans")
 	endpointUrl = endpointUrl + "?page=" + strconv.Itoa(pageNum)
 
-	body, err := DoGet(endpointUrl, info)
+	body, err := DoGet(endpointUrl, apiInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -76,9 +77,49 @@ func RecentScansCall(info *MobSFApiInfo, pageNum int) (*MobSFRecentScansResults 
 }
 
 // GetReport - http://0.0.0.0:8000/api_docs#generate-json-report-api
-func GetReport(info *MobSFApiInfo) error {
-	u, err := url.Parse(GetAPIEndpointUrl(info, "report_json"))
-	fmt.Println(u)
-	return err
+func GetReport(apiInfo *MobSFApiInfo, md5Hash string) (*APKReport, error) {
+	endpointUrl := GetAPIEndpointUrl(apiInfo, "report_json")
+	form := url.Values{
+		"hash": {md5Hash},
+	}
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", endpointUrl, strings.NewReader(form.Encode()))
+	req.Header.Set("Authorization", apiInfo.apiKey)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, errors.New("endpoint did not return status 200 : " + endpointUrl)
+	}
+
+	bodyBytes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(bodyBytes)
+	
+	report := APKReport{
+		packageName:    gjson.Get(body, "package_name").String(),
+		filename:       gjson.Get(body, "file_name").String(),
+		md5:            gjson.Get(body, "md5").String(),
+		sha1:           gjson.Get(body, "sha1").String(),
+		sha256:         gjson.Get(body, "sha256").String(),
+		size:           gjson.Get(body, "size").String(),
+		playTitle:      gjson.Get(body, "playstore_details.title").String(),
+		playDesc:       gjson.Get(body, "playstore_details.description").String(),
+		playInstall:    gjson.Get(body, "playstore_details.installs").String(),
+		playDeveloper:  gjson.Get(body, "playstore_details.developer").String(),
+		playDevWebsite: gjson.Get(body, "playstore_details.developerWebsite").String(),
+		playDevAddress: gjson.Get(body, "playstore_details.developerAddress").String(),
+		playUrl:        gjson.Get(body, "playstore_details.url").String(),
+		playVersion:    gjson.Get(body, "playstore_details.version").String(),
+		playPrivacyUrl: gjson.Get(body, "playstore_details.privacyPolicy").String(),
+	}
+	
+	return &report, nil
 }
 

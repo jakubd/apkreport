@@ -23,6 +23,6 @@ func TestGetReport(t *testing.T) {
 		panic("can't read config")
 	}
 
-	err = GetReport(apiInfo)
+	_, err = GetReport(apiInfo, "01337718e5224250e9e09d645ceda74b")
 	assert.NoError(t, err)
 }
