@@ -12,7 +12,7 @@ func TestRecentScansCall(t *testing.T) {
 		panic("can't read config")
 	}
 
-	err = RecentScansCall(apiInfo, 1)
+	_, err = RecentScansCall(apiInfo, 8)
 	assert.NoError(t, err)
 }
 
