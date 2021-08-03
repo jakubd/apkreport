@@ -42,3 +42,4 @@ app.out
 *.out
 
 .idea
+*.csv
