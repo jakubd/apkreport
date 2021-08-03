@@ -34,8 +34,8 @@ func DoGet(url string, info *MobSFApiInfo) (string, error) {
 	return string(body), err
 }
 
-// RecentScansCall - http://0.0.0.0:8000/api_docs#recent-scans-api
-func RecentScansCall(apiInfo *MobSFApiInfo, pageNum int) (*MobSFRecentScansResults, error) {
+// GetRecentScansPage - http://0.0.0.0:8000/api_docs#recent-scans-api
+func GetRecentScansPage(apiInfo *MobSFApiInfo, pageNum int) (*MobSFRecentScansResults, error) {
 	endpointUrl := GetAPIEndpointUrl(apiInfo, "scans")
 	endpointUrl = endpointUrl + "?page=" + strconv.Itoa(pageNum)
 
@@ -72,6 +72,29 @@ func RecentScansCall(apiInfo *MobSFApiInfo, pageNum int) (*MobSFRecentScansResul
 	}
 
 	return &finalResults, nil
+}
+
+// GetAllScans - return all scans info at once.
+func GetAllScans(apiInfo *MobSFApiInfo) ([]MobSFAppIndex, error) {
+	firstRes, err := GetRecentScansPage(apiInfo, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	var allRes []MobSFAppIndex
+	allRes = append(allRes, firstRes.results...)
+
+	if firstRes.numPages > 1 {
+		for i := 2; i < firstRes.numPages+1; i++ {
+			thisPageRes, err := GetRecentScansPage(apiInfo, i)
+			if err != nil {
+				return nil, err
+			}
+			allRes = append(allRes, thisPageRes.results...)
+		}
+	}
+
+	return allRes, nil
 }
 
 // GetReport - http://0.0.0.0:8000/api_docs#generate-json-report-api

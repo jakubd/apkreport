@@ -8,11 +8,9 @@ import (
 
 func TestRecentScansCall(t *testing.T) {
 	apiInfo, err := GetApiInfoFromConfig()
-	if err != nil {
-		panic("can't read config")
-	}
+	assert.NoError(t, err)
 
-	res, err := RecentScansCall(apiInfo, 1)
+	res, err := GetRecentScansPage(apiInfo, 1)
 
 	assert.NoError(t, err)
 	assert.Greater(t, res.count, 70)
@@ -21,12 +19,19 @@ func TestRecentScansCall(t *testing.T) {
 	assert.Equal(t, len(res.results[0].md5), 32)
 }
 
+func TestGetAllScans(t *testing.T) {
+	apiInfo, err := GetApiInfoFromConfig()
+	assert.NoError(t, err)
+
+	res, errScan := GetAllScans(apiInfo)
+	assert.NoError(t, errScan)
+	assert.Equal(t, len(res[0].md5), 32)
+	assert.Greater(t, len(res), 69)
+}
+
 func TestGetReport(t *testing.T) {
 	apiInfo, err := GetApiInfoFromConfig()
-
-	if err != nil {
-		panic("can't read config")
-	}
+	assert.NoError(t, err)
 
 	hashImTestingWith := "01337718e5224250e9e09d645ceda74b"
 	res, err := GetReport(apiInfo, hashImTestingWith)
