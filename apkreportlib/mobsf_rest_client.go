@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // GetAPIEndpointUrl - construct a simple MobSF API call with the API info in the struct.
@@ -56,7 +55,6 @@ func GetRecentScansPage(apiInfo *MobSFApiInfo, pageNum int) (*MobSFRecentScansRe
 			packageName: gjson.Get(thisApkJson, "PACKAGE_NAME").String(),
 			versionName: gjson.Get(thisApkJson, "VERSION_NAME").String(),
 			md5:         gjson.Get(thisApkJson, "MD5").String(),
-			timestamp:   time.Time{},
 		}
 		allResults = append(allResults, thisApk)
 		return true
@@ -132,7 +130,7 @@ func GetReport(apiInfo *MobSFApiInfo, md5Hash string) (*APKReport, error) {
 		size:           gjson.Get(body, "size").String(),
 		playTitle:      gjson.Get(body, "playstore_details.title").String(),
 		playDesc:       gjson.Get(body, "playstore_details.description").String(),
-		playInstall:    gjson.Get(body, "playstore_details.installs").String(),
+		playInstalls:   gjson.Get(body, "playstore_details.installs").String(),
 		playDeveloper:  gjson.Get(body, "playstore_details.developer").String(),
 		playDevWebsite: gjson.Get(body, "playstore_details.developerWebsite").String(),
 		playDevAddress: gjson.Get(body, "playstore_details.developerAddress").String(),
