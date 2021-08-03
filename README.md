@@ -5,6 +5,8 @@
 Generate a csv report of basic app information from the 
 [MobSF](https://github.com/MobSF/Mobile-Security-Framework-MobSF) API.
 
+
+
 Sample input:
 
 ```text

@@ -10,10 +10,13 @@ GOGET=$(GOCMD) get
 GETDEPS=$(GOCMD) mod download
 BINARY_NAME=apkreport
 
-all: deps test build
+all: deps build
+install: $(BINARY_NAME)
+		mv $(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
 build:
 		$(GOBUILD) -o $(BINARY_NAME) -v
 		@echo "build done run with: ./$(BINARY_NAME)"
+		@echo "or install with 'sudo make install' to install to /usr/local/bin/$(BINARY_NAME)"
 test:
 		$(GOTEST) -v ./...
 clean:
