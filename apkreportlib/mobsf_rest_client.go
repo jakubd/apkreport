@@ -2,7 +2,6 @@ package apkreportlib
 
 import (
 	"errors"
-	"fmt"
 	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"net/http"
@@ -12,10 +11,12 @@ import (
 	"time"
 )
 
+// GetAPIEndpointUrl - construct a simple MobSF API call with the API info in the struct.
 func GetAPIEndpointUrl(info *MobSFApiInfo, endpoint string) string {
 	return info.hostname + ":" + strconv.Itoa(info.port) + "/api/v1/" + endpoint
 }
 
+// DoGet - Do a simple GET request and return the body as a string.
 func DoGet(url string, info *MobSFApiInfo) (string, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
@@ -58,14 +59,11 @@ func RecentScansCall(apiInfo *MobSFApiInfo, pageNum int) (*MobSFRecentScansResul
 			timestamp:   time.Time{},
 		}
 		allResults = append(allResults, thisApk)
-		fmt.Println(thisApk)
 		return true
 	})
 
 	count := int(gjson.Get(body, "count").Int())
 	pages := int(gjson.Get(body, "num_pages").Int())
-
-	fmt.Println(count, pages, allResults)
 
 	finalResults := MobSFRecentScansResults{
 		count: count,
